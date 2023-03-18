@@ -1,11 +1,11 @@
 package com.techacademy.controller;
 
 import java.util.Set;
-
+import javax.validation.Valid;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.validation.BindingResult; // 追加
-import org.springframework.validation.annotation.Validated; // 追加
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -24,7 +24,6 @@ public class UserController {
     public UserController(UserService service) {
         this.service = service;
     }
-
     /** 一覧画面を表示 */
     @GetMapping("/list")
     public String getList(Model model) {
@@ -33,14 +32,12 @@ public class UserController {
         // user/list.htmlに画面遷移
         return "user/list";
     }
-
     /** User登録画面を表示 */
     @GetMapping("/register")
     public String getRegister(@ModelAttribute User user) {
         // User登録画面に遷移
         return "user/register";
     }
-
     // ----- 変更ここから -----
     /** User登録処理 */
     @PostMapping("/register")
@@ -55,22 +52,21 @@ public class UserController {
         return "redirect:/user/list";
     }
     // ----- 変更ここまで -----
-
     /** User更新画面を表示 */
     @GetMapping("/update/{id}/")
     public String getUser(@PathVariable("id") Integer id, Model model) {
-        // Modelに登録
-        model.addAttribute("user", service.getUser(id));
-        // User更新画面に遷移
+        if (id != null) {
+            model.addAttribute("user", service.getUser(id));
+        }
         return "user/update";
     }
 
-    /** User更新処理 */
     @PostMapping("/update/{id}/")
-    public String postUser(User user) {
-        // User登録
+    public String postUser(@Valid User user, BindingResult bindingResult, Model model) {
+        if (bindingResult.hasErrors()) {
+            return getUser(null, model);
+        }
         service.saveUser(user);
-        // 一覧画面にリダイレクト
         return "redirect:/user/list";
     }
 
